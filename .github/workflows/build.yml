@@ -1,34 +1,45 @@
 name: Build Native iOS dylib (xantapers)
+
 on:
-push:
-branches: [ main, master ]
-pull_request:
-branches: [ main, master ]
-workflow_dispatch:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
 jobs:
-build-ios-dylib:
-runs-on: macos-latest
-steps:
-- name: Checkout repository
-uses: actions/checkout@v4
-- name: Verify source file
-run: |
-if [ ! -f "src/xantapers.mm" ]; then
-echo "ОШИБКА: Файл src/xantapers.mm не найден!"
-exit 1
-fi
-- name: Compile xantapers.dylib (arm64 iOS)
-run: |
-mkdir -p release
-SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
-clang++ -dynamiclib -arch arm64 -isysroot "$SDK_PATH" -miphoneos-version-min=13.0 -std=c++17 -fobjc-arc -O2 -framework UIKit -framework Foundation -install_name @executable_path/Frameworks/xantapers.dylib src/xantapers.mm -o release/xantapers.dylib
-codesign -f -s - release/xantapers.dylib
-- name: Package ZIP archive
-run: |
-cd release
-zip -r xantapers-ios-dylib.zip xantapers.dylib
-- name: Upload xantapers-ios-dylib.zip Artifact
-uses: actions/upload-artifact@v4
-with:
-name: xantapers-ios-dylib
-path: release/xantapers-ios-dylib.zip
+  build-ios-dylib:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify source file
+        run: |
+          if [ ! -f "src/xantapers.mm" ]; then
+            echo "ОШИБКА: Файл src/xantapers.mm не найден!"
+            exit 1
+          fi
+
+      - name: Compile xantapers.dylib (arm64 iOS)
+        run: |
+          mkdir -p release
+          SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
+          xcrun --sdk iphoneos clang++ -dynamiclib -arch arm64 \
+            -isysroot "$SDK_PATH" -miphoneos-version-min=13.0 \
+            -std=c++17 -fobjc-arc -O2 \
+            -framework UIKit -framework Foundation \
+            -install_name @executable_path/Frameworks/xantapers.dylib \
+            src/xantapers.mm -o release/xantapers.dylib
+          codesign -f -s - release/xantapers.dylib
+
+      - name: Package ZIP archive
+        run: |
+          cd release
+          zip -r xantapers-ios-dylib.zip xantapers.dylib
+
+      - name: Upload xantapers-ios-dylib.zip Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: xantapers-ios-dylib
+          path: release/xantapers-ios-dylib.zip
