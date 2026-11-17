@@ -21,19 +21,7 @@ fi
 run: |
 mkdir -p release
 SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
-clang++ -dynamiclib 
--arch arm64 
--isysroot "$SDK_PATH" 
--miphoneos-version-min=13.0 
--std=c++17 
--fobjc-arc 
--O2 
--framework UIKit 
--framework Foundation 
--install_name @executable_path/Frameworks/xantapers.dylib 
-src/xantapers.mm 
--o release/xantapers.dylib
-# Подпись ad-hoc для корректной работы при инжекте в IPA
+clang++ -dynamiclib -arch arm64 -isysroot "$SDK_PATH" -miphoneos-version-min=13.0 -std=c++17 -fobjc-arc -O2 -framework UIKit -framework Foundation -install_name @executable_path/Frameworks/xantapers.dylib src/xantapers.mm -o release/xantapers.dylib
 codesign -f -s - release/xantapers.dylib
 - name: Package ZIP archive
 run: |
