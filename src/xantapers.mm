@@ -274,4 +274,4 @@ attribute((constructor))
 static void InitializeXantapersMod() {
 NSLog(@"[xantapers] Dylib успешно загружен! Применение патчей по адресам dump.cs...");
 SetupOverlayMenu();
-}
+}ccccc
